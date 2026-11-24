@@ -41,6 +41,23 @@ models to see where that understanding is lost.
 Full tables: [`results/RESULTS.md`](results/RESULTS.md). Layer curves: `results/fig_lens.png`. Problems and decisions:
 [`docs/RESEARCH_LOG.md`](docs/RESEARCH_LOG.md).
 
+## Part 2: does the model know when it misreads Roman Urdu? (no new model runs)
+A screening tool could send uncertain cases to a human. That only protects Roman Urdu speakers if the model is *less
+confident when it is wrong*. Using the same outputs (`confidence.py`, CPU only):
+- **Confidence works where the model already works.** In English, confidence separates right from wrong answers well
+  (AUROC 0.86 Qwen / 0.77 BLOOMZ). In Roman Urdu the signal is weak (Qwen 0.64) or absent (BLOOMZ 0.45, no better
+  than chance).
+- **One deferral rule for everyone** ("send the least-confident 30% to a human"): for Qwen, Roman Urdu answers are
+  deferred most (61%), but the kept Roman Urdu answers are still only 0.50 accurate (English 0.94). For BLOOMZ, Roman
+  Urdu is deferred no more than other languages and **73% of its Roman Urdu errors slip through**.
+- "Nearly every day" in Roman Urdu: accuracy 0.04 at confidence 0.48, so the model is wrong almost always without
+  signalling it strongly.
+- An internal signal (does the answer stay the same over the last third of layers?) is the best detector in English
+  (AUROC 0.93, Qwen) but does not help in Roman Urdu.
+
+So "ask a human when unsure" protects the users who need it least. Small samples (72 answers per model and language),
+so these are descriptive numbers, not significance claims. Tables: [`results/RESULTS_confidence.md`](results/RESULTS_confidence.md).
+
 ## Limitations
 Two small models (1.5-1.7B); 8 symptom templates; one answer format; sentences reviewed but not formally
 native-validated. This is a pilot that points to *where* to look (romanized frequency words, especially
@@ -52,6 +69,7 @@ python lens_study.py selftest     # checks the stimuli, no model needed
 python lens_study.py run          # logit lens on all stimuli (needs a CUDA GPU)
 python lens_study.py calibrate    # content-free option prior per layer
 python lens_study.py results      # tables + figure -> results/
+python confidence.py              # part 2: confidence and deferral (CPU, uses data/lens.jsonl)
 ```
 
 ## Disclosure

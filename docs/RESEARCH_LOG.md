@@ -30,6 +30,12 @@ The system drive had only ~4 GB free, so PyTorch, Transformers and the models we
 The "latent English" signal (Latin-script tokens in middle layers) appears for all input languages in these models,
 so it does not by itself explain the Urdu gap. Settling depth differences between languages were small and noisy.
 
+### 7. Part 2: confidence and deferral
+A natural safety fix is to let the model defer when unsure. We tested whether that would catch the Roman Urdu errors,
+reusing the saved outputs (no new runs). We used calibrated probabilities, because raw ones mostly reflect answer
+habits (entry 4), and one deferral threshold for all languages, because a real tool would not know the user's
+language in advance. Result: confidence flags errors in English but barely or not at all in Roman Urdu.
+
 ## Next steps
 Larger models (7-8B in 4-bit), patching the frequency word's representation from English into Roman Urdu
 (activation patching) to test whether the failure is in reading "taqreeban" or later, and a formally validated
